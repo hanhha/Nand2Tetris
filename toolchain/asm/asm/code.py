@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 import sys
-from spec import *
+from .spec import *
 
 class code (object):
 	def __init__ (self, symbol_tbl, start_mem_addr):
 		self.symbol_tbl = symbol_tbl
+		self.variable_tbl = dict ()
 		self.avail_mem_addr = start_mem_addr
 
 	def translate (self, line):
@@ -21,9 +22,11 @@ class code (object):
 					imm = preSymbols [cmd_strt["symbol"]]
 				elif cmd_strt["symbol"] in self.symbol_tbl:
 					imm = self.symbol_tbl [cmd_strt["symbol"]]
+				elif cmd_strt["symbol"] in self.variable_tbl:
+					imm = self.variable_tbl [cmd_strt["symbol"]]
 				else:
 					imm = self.avail_mem_addr
-					self.symbol_tbl [cmd_strt["symbol"]] = imm
+					self.variable_tbl [cmd_strt["symbol"]] = imm
 					self.avail_mem_addr += 1
 			return "0" + f'{imm:015b}'
 		elif cmd_strt ["type"] == "C":

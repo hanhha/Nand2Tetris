@@ -7,9 +7,7 @@ import sys
 from datetime import datetime
 
 from argparse import ArgumentParser
-from line_parser import *
-from code import *
-from spec import *
+from asm import (line_parser, code) 
 
 parser = ArgumentParser ()
 parser.add_argument ("-d", "--debug", action = 'store_true', default = False, help = "Print list file that help to debug") 
@@ -22,7 +20,7 @@ basename = os.path.splitext (args.filename)[0]
 listname = basename + '.' + "lst"
 outname  = basename + '.' + "hack" if args.output == None else args.output
 
-print ("Translating %s to %s ... "%(args.filename, outname))
+print ("Assembling %s to %s ... "%(args.filename, outname))
 
 sourcelines  = list ()
 cmdlist      = list ()
@@ -39,7 +37,7 @@ with open (args.filename) as f:
 	pc = 0
 	lineno = 1
 	for line in f:
-		cmd_strt = line_parser(line).type()
+		cmd_strt = line_parser.line_parser(line).type()
 		sourcelines.append({"pc" : pc, "no" : lineno, "code": line, "struct": cmd_strt})
 		if cmd_strt is not None:
 			if cmd_strt ["type"] == "L":
@@ -57,7 +55,7 @@ with open (args.filename) as f:
 if lfile is not None:
 	lfile.write ("\nCommand translation: \n")
 
-code = code (symbol_table, 16)
+code = code.code (symbol_table, 16)
 for line in sourcelines:
 	if line["struct"] is not None:
 		if (line["struct"]["type"] != "E"):
@@ -73,6 +71,9 @@ for line in sourcelines:
 			sys.exit (f'Invalid syntax:\n Line {line["no"]} : {line["code"]}')
 
 if lfile is not None:
+	lfile.write ("\nVariable allocation table:\n")
+	for k,v in code.variable_tbl.items():
+		lfile.write (k + " : " + str(v) + "\n")
 	lfile.write ("\nCreated at " + datetime.now().strftime ("%d/%m%Y %H:%M:%S") + "\nEOF.\n") 
 	lfile.close ()
 ofile.close ()
