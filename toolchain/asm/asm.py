@@ -66,15 +66,19 @@ for line in sourcelines:
 			else:
 				debug_info = f'{line["pc"]:015}  :  {" ":16}  :  {line["code"]}'
 			if lfile is not None:
-				lfile.write (debug_info + "\n")
+				lfile.write (debug_info)
 		else:
 			sys.exit (f'Invalid syntax:\n Line {line["no"]} : {line["code"]}')
+	else:
+		if lfile is not None:
+			debug_info = f'{line["pc"]:015}  :  {" ":16}  :  {line["code"]}'
+			lfile.write (debug_info)
 
 if lfile is not None:
 	lfile.write ("\nVariable allocation table:\n")
 	for k,v in code.variable_tbl.items():
 		lfile.write (k + " : " + str(v) + "\n")
-	lfile.write ("\nCreated at " + datetime.now().strftime ("%d/%m%Y %H:%M:%S") + "\nEOF.\n") 
+	lfile.write ("\nCreated at " + datetime.now().strftime ("%d/%m/%Y %H:%M:%S") + "\nEOF.\n") 
 	lfile.close ()
 ofile.close ()
 

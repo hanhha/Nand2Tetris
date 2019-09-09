@@ -3,3 +3,4 @@ Aug 21 - Aug 23, 2019: Finished reading book "The Elements of Computing Systems:
 Aug 24, 2019: 1:30 AM, I was very thrilled about this project. I was installing icarus verilog and verilator as well to prepare for implementing the machine in this book using Verilog and simulate it with software not using the book's tool suite. 
               Turned back to software and finished Hack assembler (written in Python).
 Aug 30, 2019: Finished VM phase 1 (project 07).
+Sep 10, 2019: Finished VM phase 2 (project 08). 
