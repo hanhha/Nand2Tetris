@@ -4,3 +4,4 @@ Aug 24, 2019: 1:30 AM, I was very thrilled about this project. I was installing 
               Turned back to software and finished Hack assembler (written in Python).
 Aug 30, 2019: Finished VM phase 1 (project 07).
 Sep 10, 2019: Finished VM phase 2 (project 08). 
+Sep 11, 2019: Started implementing CPU in SystemVerilog and tried Verilator. I planned to create assertions from beginning to verify this CPU.
