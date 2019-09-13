@@ -16,4 +16,4 @@ always_ff @(posedge clk or negedge rstn) begin
   end
 end
 
-endmodule: libCOUNTER
+endmodule

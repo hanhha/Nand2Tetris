@@ -1,15 +1,15 @@
-module libARstnFF #(parameter               D_WIDTH = 1,
-                    parameter [D_WIDTH-1:0] D_INIT = 0) 
+module libARstnFF #(parameter W = 1,
+                    parameter I = 0) 
 (
-  input logic clk,
-  input logic rstn,
-  input logic [D_WIDTH-1:0] d,
-  input logic [D_WIDTH-1:0] q
+  input  logic clk,
+  input  logic rstn,
+  input  logic [W-1:0] d,
+  output logic [W-1:0] q
 );
 
 always_ff @(posedge clk or negedge rstn) begin
-  if (~rstn) q <= D_INIT;
+  if (~rstn) q <= I [W-1:0];
   else       q <= d;
 end
 
-endmodule: libARstnFF
+endmodule

@@ -1,7 +1,14 @@
 Aug 21 - Aug 23, 2019: Finished reading book "The Elements of Computing Systems: Building a Modern Computer from First Principles".
                        Audit the course Nand2Tetris part II. I planned to start the software phase first since I have another plan for hardward.
-Aug 24, 2019: 1:30 AM, I was very thrilled about this project. I was installing icarus verilog and verilator as well to prepare for implementing the machine in this book using Verilog and simulate it with software not using the book's tool suite. 
+Aug 24, 2019: 1:30 AM, I was very thrilled about this project.
+              I was installing icarus verilog and verilator as well to prepare for implementing the machine in this book using Verilog and simulate it with software not using the book's tool suite. 
               Turned back to software and finished Hack assembler (written in Python).
 Aug 30, 2019: Finished VM phase 1 (project 07).
 Sep 10, 2019: Finished VM phase 2 (project 08). 
 Sep 11, 2019: Started implementing CPU in SystemVerilog and tried Verilator. I planned to create assertions from beginning to verify this CPU.
+Sep 12, 2019: Tried Yosys and Verilator. Many of SystemVerilog statements were not understood by Yosys, especially .* operation - the worst case. 
+Sep 13, 2019: I created some simple SVA assertions for GENEGIC_REG module.,
+              and spent whole evening and over midnight to compile and install SymbiYosis and neccessary solvers.
+							Unfortunately, concurrent assertions were not supported by Yosys (with all free and opensource parsers) yet.
+							A part of time was for rewriting assertions using small subset of System Verilog and SVA that Yosys could understand.
+							Not feel as free as using comercial EDA tools :D   
