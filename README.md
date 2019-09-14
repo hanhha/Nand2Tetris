@@ -3,10 +3,10 @@ Another Nand2Tetris course's implementation, base on the book introduced in cour
 
 Items:
 - [x] Assembler
-- [ ] VM
+- [x] VM
 - [ ] Compiler
 - [ ] OS (in term of this book)
-- [ ] ALU in System Verilog
+- [x] ALU in System Verilog
 - [ ] Computer in System Verilog
 - [ ] Emulate Screen and Keyboard connected to System Verilog's simulator (use Verilator)
 
