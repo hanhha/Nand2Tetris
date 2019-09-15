@@ -12,3 +12,6 @@ Sep 13, 2019: I created some simple SVA assertions for GENEGIC_REG module.,
 							Unfortunately, concurrent assertions were not supported by Yosys (with all free and opensource parsers) yet.
 							A part of time was for rewriting assertions using small subset of System Verilog and SVA that Yosys could understand.
 							Not feel as free as using comercial EDA tools :D   
+Sep 15, 2019: 2 day for trying iCE40-HX8K-B-EVN board. So far so good. I also tried to do simple DAC with additional circuit.
+              The board generated high logic as about 3.3v (I did measure and it was actually near to 4v). So I had to make additional circuit to scale down the voltage to 1v.
+              Ready for implementing VPU which create PAL signal on RCA cable (mono only). This would serve as Screen in this Nand2Tetris computer.

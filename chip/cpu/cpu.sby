@@ -1,0 +1,13 @@
+[options]
+mode bmc
+depth 10
+
+[engines]
+smtbmc boolector
+
+[script]
+read_verilog -sv -formal GENERIC_REG.sv
+prep -top GENERIC_REG
+
+[files]
+GENERIC_REG.sv
