@@ -6,17 +6,28 @@
   `define FF_MODULE libSRstnFF
 `endif
 
-module SCREEN_MEMPIX #(parameter MAX_COL = 834, MAX_ROW = 456)
+module SCREEN_MEMPIX #(parameter MAX_COL = 834, MAX_ROW = 456,
+                                 AW = 19, DW = 16)
 (
-  input  logic       clk,
-  input  logic       rstn,
+  input  logic          clk,
+  input  logic          rstn,
 
-  input  logic       hsync,
-  input  logic       vsync,
-  input  logic [9:0] pf_pix_row,
-  input  logic [9:0] pf_pix_col,
+  input  logic          hsync,
+  input  logic          vsync,
+  input  logic [9:0]    pf_pix_row,
+  input  logic [9:0]    pf_pix_col,
 
-  output logic [7:0] pix_val
+  input  logic          text_mode_en,
+
+  output logic          mem_addr_vld,
+  input  logic          mem_addr_gnt,
+  output logic [AW-1:0] mem_addr,
+
+  input  logic          mem_dat_vld,
+  output logic          mem_dat_gnt,
+  input  logic [DW-1:0] mem_dat,
+
+  output logic [7:0]    pix_val
 );
 
 logic vsync_pulse, vsync_pre;
@@ -72,6 +83,12 @@ assign nxt_pix_val = border ? WHITE_LVL //: BLACK_LVL;
 `FF_MODULE #(.W(8)) pix_val_ff (.clk(clk), .rstn(rstn), .d(nxt_pix_val), .q(pix_val));
 
 libSink sink_hsync (.i(hsync));
+
+assign {mem_addr_vld, mem_addr, mem_dat_gnt} = {1'b0, {AW{1'b0}}, 1'b1};
+
+libSink #(.W(DW)) sink_mem_dat       (.i(mem_dat));
+libSink           sink_mem_vld       (.i(mem_dat_vld));
+libSink           sink_mem_gnt       (.i(mem_addr_gnt));
 
 endmodule
 `undef FF_MODULE

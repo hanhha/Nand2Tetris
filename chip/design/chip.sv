@@ -15,20 +15,14 @@ SCREEN ISCREEN (
   .clk  (clk33),
   .rstn (rstn),
 
-//  .ce   (1'b0),
-//  .we   (1'b0),
-//  .din  (16'd0),
-//  .addr (3'd0),
-//  .dvld (),
-//  .dout (),
-//  .cack (),
-
 /* verilator lint_off PINCONNECTEMPTY */
-  .mem_ce (),
-  .mem_addr (),
+  .mem_addr_vld (),
+  .mem_addr_gnt (1'b0),
+  .mem_addr     (),
+  .mem_dat_vld  (1'b0),
+  .mem_dat_gnt  (),
+  .mem_dat      (16'd0),
 /* verilator lint_on PINCONNECTEMPTY */
-  .mem_vld (1'b0),
-  .mem_dat (16'd0),
 
   .dac_bin (dac_bin)
 );

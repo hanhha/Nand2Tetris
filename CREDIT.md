@@ -1,0 +1,2 @@
+- "The Elements of Computing Systems: Build a Modern Computer from First Principles" book (Noam Nisan and Shimon Schocken).
+- nowox's [code](https://gist.github.com/prwhite/8168133#gistcomment-1394598) to add help target to Makefile.
