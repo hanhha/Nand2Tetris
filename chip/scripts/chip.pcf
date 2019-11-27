@@ -1,0 +1,41 @@
+# User Constraint File for iCE40hx8k Breakout Board
+
+# Onboard LED and GPIO
+#set_io led[0] B5
+#set_io led[1] B4
+#set_io led[2] A2
+#set_io led[3] A1
+#set_io led[4] C5
+#set_io led[5] C4
+#set_io led[6] B3
+#set_io led[7] C3
+
+set_io dac_bin[4] M15
+set_io dac_bin[5] L16
+set_io dac_bin[6] K16
+set_io dac_bin[7] J14
+
+set_io dac_bin[0] N16
+set_io dac_bin[1] M16
+set_io dac_bin[2] K15
+set_io dac_bin[3] K14
+
+# 2 data lines I2C
+#set_io e_i2c_sck R15
+#set_io e_i2c_sda[0] P15
+#set_io e_i2c_sda[1] P16
+
+# I2C
+#set_io i2c_sck G14
+#set_io i2c_sda F14
+
+# Resetn button
+set_io -pullup yes rstn C1
+
+# Other buttons
+#set_io -pullup yes btnOK B1
+#set_io -pullup yes btnUL  C2
+#set_io -pullup yes btnDR  B2
+
+# Onboard 12Mhz oscillator
+set_io clk J3
