@@ -22,7 +22,7 @@ proc read_filelist {curdir filename} {
 	}
 }
 
-yosys read -define SYNTHESIS
+yosys read -define SYNTHESIS -define SELECT_SRSTn # For FPGA
 puts "Reading specific files ..."
 read_filelist $specific_dir "filelist.f"
 puts "Reading design files ..."

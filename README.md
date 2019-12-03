@@ -10,5 +10,5 @@ Items:
 - [ ] Computer in System Verilog
 - [ ] Emulate Screen and Keyboard connected to System Verilog's simulator (use Verilator)
 
-Decided to make in in FPGA. Tried to output something to NTSC display.
-![FPGA](https://raw.githubusercontent.com/hanhha/Nand2Tetris/master/resources/IMG_6717.jpg "FPGA")
+Decided to the system in FPGA. Somehow it's becoming my experience of iCE40-Hx8k FPGA in spare time :D. 
+

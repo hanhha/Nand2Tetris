@@ -10,11 +10,11 @@
 #set_io led[6] B3
 #set_io led[7] C3
 
+# Screen's DAC
 set_io dac_bin[4] M15
 set_io dac_bin[5] L16
 set_io dac_bin[6] K16
 set_io dac_bin[7] J14
-
 set_io dac_bin[0] N16
 set_io dac_bin[1] M16
 set_io dac_bin[2] K15
@@ -30,12 +30,11 @@ set_io dac_bin[3] K14
 #set_io i2c_sda F14
 
 # Resetn button
-set_io -pullup yes rstn C1
-
+set_io -pullup yes rstn D16 
 # Other buttons
-#set_io -pullup yes btnOK B1
-#set_io -pullup yes btnUL  C2
-#set_io -pullup yes btnDR  B2
+#set_io -pullup yes btnOK C16
+#set_io -pullup yes btnUL  D14
+#set_io -pullup yes btnDR  B16
 
 # Onboard 12Mhz oscillator
 set_io clk J3

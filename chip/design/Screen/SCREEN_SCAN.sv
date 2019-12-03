@@ -7,7 +7,7 @@
 `endif
 
 module SCREEN_SCAN #(parameter MAX_ROW = 525, MAX_COL = 420, UNIT = 5,
-                               VOFFSET = 10'd44, HOFFSET = 10'd8)
+                               VOFFSET = 10'd46, HOFFSET = 10'd8)
 (
   input  logic       clk,
   input  logic       rstn,
@@ -157,11 +157,11 @@ logic [7:0] dac, nxt_dac;
 assign sync_en = (lsync | ssync) ? vsync_sig : hsync_sig;
 assign nxt_dac = sync_en                 ? SYNC_LVL  :
                  h_invi_sig | v_invi_sig ? BLANK_LVL :
-                                           dac;
+                                           h_visible & v_visible ? pix_val : dac;
 
 `FF_MODULE #(.W(8)) dac_ff   (.clk(clk), .rstn(rstn), .d(nxt_dac), .q(dac));
 
-assign dac_bin   = h_visible & v_visible ? pix_val : dac;
+assign dac_bin   = dac;
 
 endmodule
 `undef FF_MODULE

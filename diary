@@ -16,3 +16,4 @@ Sep 15, 2019: 2 day for trying iCE40-HX8K-B-EVN board. So far so good. I also tr
               The board generated high logic as about 3.3v (I did measure and it was actually near to 4v). So I had to make additional circuit to scale down the voltage to 1v.
               Ready for implementing VPU which create PAL signal on RCA cable (mono only). This would serve as Screen in this Nand2Tetris computer.
 Nov 27, 2019: Several weeks of distraction. Re-organize files and add some new code.
+Dec 03, 2019: Font for text mode and display characters on screen.

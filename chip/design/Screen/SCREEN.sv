@@ -28,23 +28,30 @@ localparam MAX_SCREEN_ROW = 525;
 localparam MAX_SCREEN_COL = 420;
 localparam LOOP0_15US     = 5;
 
-localparam MAX_PIX_ROW    = 456;
+localparam MAX_PIX_ROW    = 454;
 localparam MAX_PIX_COL    = 833;
 
 logic                  interlace_mode;
 logic [EXT_MEM_AW-1:0] mem_base;
 logic                  text_mode_en;
+logic                  bw_mode_en;
+
+logic [7:0]            pix_val, pf_dat;
+logic [MEM_AW-1:0]     pf_addr;
+logic [9:0]            pf_pix_row, pf_pix_col;
+logic                  hsync, vsync;
+
+logic [MEM_AW-1:0]     mem_lcl_addr;
+
+assign mem_addr = {mem_base, mem_lcl_addr};
 
 SCREEN_REG #(.DW(DW), .AW(REG_AW))
       IREG (.clk(clk), .rstn(rstn),
             .interlace_mode (interlace_mode),
             .text_mode_en   (text_mode_en),
+            .bw_mode_en     (bw_mode_en),
             .mem_base       (mem_base)
            );
-
-logic [7:0]        pix_val;
-logic [9:0]        pf_pix_row, pf_pix_col;
-logic              hsync, vsync;
 
 SCREEN_SCAN #(.MAX_ROW(MAX_SCREEN_ROW), .MAX_COL(MAX_SCREEN_COL),
               .UNIT(LOOP0_15US))
@@ -58,26 +65,32 @@ SCREEN_SCAN #(.MAX_ROW(MAX_SCREEN_ROW), .MAX_COL(MAX_SCREEN_COL),
              .dac_bin        (dac_bin)
             );
 
-logic [MEM_AW-1:0]     mem_lcl_addr;
+SCREEN_PIX #(.MAX_COL(MAX_PIX_COL), .MAX_ROW(MAX_PIX_ROW),
+                .AW(MEM_AW))
+      IPIX (.clk(clk), .rstn(rstn),
+            .hsync        (hsync),
+            .vsync        (vsync),
+            .pf_pix_row   (pf_pix_row),
+            .pf_pix_col   (pf_pix_col),
+            .text_mode_en (text_mode_en),
+            .bw_mode_en   (bw_mode_en),
+            .pf_addr      (pf_addr),
+            .pf_dat       (pf_dat),
+            .pix_val      (pix_val)
+           );
 
-SCREEN_MEMPIX #(.MAX_COL(MAX_PIX_COL), .MAX_ROW(MAX_PIX_ROW),
-                .AW(MEM_AW), .DW(DW))
-      IMEMPIX (.clk(clk), .rstn(rstn),
-               .hsync        (hsync),
-               .vsync        (vsync),
-               .pf_pix_row   (pf_pix_row),
-               .pf_pix_col   (pf_pix_col),
-               .text_mode_en (text_mode_en),
-               .mem_addr_vld (mem_addr_vld),
-               .mem_addr_gnt (mem_addr_gnt),
-               .mem_addr     (mem_lcl_addr),
-               .mem_dat_vld  (mem_dat_vld),
-               .mem_dat_gnt  (mem_dat_gnt),
-               .mem_dat      (mem_dat),
-               .pix_val      (pix_val)
-              );
+SCREEN_PF_MEM #(.AW(MEM_AW), .DW(DW))
+      IPF_MEM (.clk(clk), .rstn(rstn),
+            .mem_addr_vld (mem_addr_vld),
+            .mem_addr_gnt (mem_addr_gnt),
+            .mem_addr     (mem_lcl_addr),
+            .mem_dat_vld  (mem_dat_vld),
+            .mem_dat_gnt  (mem_dat_gnt),
+            .mem_dat      (mem_dat),
 
-assign mem_addr = {mem_base, mem_lcl_addr};
+            .pf_addr      (pf_addr),
+            .pf_dat       (pf_dat)
+           );
 
 endmodule
 `undef FF_MODULE

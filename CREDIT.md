@@ -1,2 +1,3 @@
 - "The Elements of Computing Systems: Build a Modern Computer from First Principles" book (Noam Nisan and Shimon Schocken).
 - nowox's [code](https://gist.github.com/prwhite/8168133#gistcomment-1394598) to add help target to Makefile.
+- Amstrad CPC font for 95 visible ascii characters (cloned [here](https://fontstruct.com/fontstructions/show/447296/amstrad_cpc_correct) by Damien Guard, I made text file to load to ROM manually).
