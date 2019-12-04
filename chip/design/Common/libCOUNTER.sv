@@ -6,12 +6,6 @@
 // 1  0  {0, din}
 // 1  1  {0, din}
 
-`ifndef SELECT_SRSTn
-  `define FF_MODULE libARstnFF
-`else
-  `define FF_MODULE libSRstnFF
-`endif
-
 module libCOUNTER #(parameter DW= 16)
 (
   input  logic clk,
@@ -65,5 +59,4 @@ end
   `endif
 `endif
 endmodule
-`undef FF_MODULE
 //EOF

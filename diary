@@ -17,3 +17,6 @@ Sep 15, 2019: 2 day for trying iCE40-HX8K-B-EVN board. So far so good. I also tr
               Ready for implementing VPU which create PAL signal on RCA cable (mono only). This would serve as Screen in this Nand2Tetris computer.
 Nov 27, 2019: Several weeks of distraction. Re-organize files and add some new code.
 Dec 03, 2019: Font for text mode and display characters on screen.
+Dec 04, 2019: Implemented SRAM controller. However I had not finished my expansion board for 4 SRAM chip yet. Should I mimic it using BRAM of FPGA :D
+              Implemented prefetch cache for Screen IP.
+              Fabric might be the next.

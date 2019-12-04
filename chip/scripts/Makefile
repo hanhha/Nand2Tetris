@@ -1,3 +1,4 @@
+VERILATOR_WNO=-Wno-LITENDIAN
 DESIGN_DIR=../design
 VERIF_DIR=../verif
 
@@ -7,11 +8,11 @@ all: help
 
 .PHONY: lint 
 lint: ##@Lint Run lint only
-	verilator --lint-only --bbox-unsup --top-module ${TOP} -F ${DESIGN_DIR}/filelist.f
+	verilator --lint-only ${VERILATOR_WNO} --bbox-unsup --top-module ${TOP} -F ${DESIGN_DIR}/filelist.f
 
 .PHONY: verilator
 verilator: ##@Simulation Compile design and test environment
-	verilator -Wall --trace --cc --top-module ${TOP} --exe ${VERIF_DIR}/test.cpp \
+	verilator -Wall --trace --cc ${VERILATOR_WNO} --top-module ${TOP} --exe ${VERIF_DIR}/test.cpp \
 					 -F ${DESIGN_DIR}/filelist.f
 	make -C obj_dir/ -f V${TOP}.mk V${TOP}
 

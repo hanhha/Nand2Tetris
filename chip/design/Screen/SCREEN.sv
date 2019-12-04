@@ -1,13 +1,7 @@
 // Ha Minh Tran Hanh (c)
 // NTSC Processing Unit
 
-`ifndef SELECT_SRSTn
-  `define FF_MODULE libARstnFF
-`else
-  `define FF_MODULE libSRstnFF
-`endif
-
-module SCREEN #(parameter DW = 16, MEM_AW=19, REG_AW=3, EXT_MEM_AW=1)
+module SCREEN #(parameter DW = 32, MEM_AW=17, REG_AW=3, EXT_MEM_AW=1)
 (
   input  logic clk,
   input  logic rstn,
@@ -40,13 +34,14 @@ logic [7:0]            pix_val, pf_dat;
 logic [MEM_AW-1:0]     pf_addr;
 logic [9:0]            pf_pix_row, pf_pix_col;
 logic                  hsync, vsync;
+logic                  hsync_pulse, vsync_pulse;
 
 logic [MEM_AW-1:0]     mem_lcl_addr;
 
 assign mem_addr = {mem_base, mem_lcl_addr};
 
 SCREEN_REG #(.DW(DW), .AW(REG_AW))
-      IREG (.clk(clk), .rstn(rstn),
+      IREG (`CLKRST,
             .interlace_mode (interlace_mode),
             .text_mode_en   (text_mode_en),
             .bw_mode_en     (bw_mode_en),
@@ -55,11 +50,13 @@ SCREEN_REG #(.DW(DW), .AW(REG_AW))
 
 SCREEN_SCAN #(.MAX_ROW(MAX_SCREEN_ROW), .MAX_COL(MAX_SCREEN_COL),
               .UNIT(LOOP0_15US))
-      ISCAN (.clk(clk), .rstn(rstn),
+      ISCAN (`CLKRST,
              .interlace_mode (interlace_mode),
              .pix_val        (pix_val),
              .hsync          (hsync),
              .vsync          (vsync),
+             .hsync_pulse    (hsync_pulse),
+             .vsync_pulse    (vsync_pulse),
              .pf_pix_row     (pf_pix_row),
              .pf_pix_col     (pf_pix_col),
              .dac_bin        (dac_bin)
@@ -67,9 +64,7 @@ SCREEN_SCAN #(.MAX_ROW(MAX_SCREEN_ROW), .MAX_COL(MAX_SCREEN_COL),
 
 SCREEN_PIX #(.MAX_COL(MAX_PIX_COL), .MAX_ROW(MAX_PIX_ROW),
                 .AW(MEM_AW))
-      IPIX (.clk(clk), .rstn(rstn),
-            .hsync        (hsync),
-            .vsync        (vsync),
+      IPIX (`CLKRST,
             .pf_pix_row   (pf_pix_row),
             .pf_pix_col   (pf_pix_col),
             .text_mode_en (text_mode_en),
@@ -79,8 +74,13 @@ SCREEN_PIX #(.MAX_COL(MAX_PIX_COL), .MAX_ROW(MAX_PIX_ROW),
             .pix_val      (pix_val)
            );
 
-SCREEN_PF_MEM #(.AW(MEM_AW), .DW(DW))
-      IPF_MEM (.clk(clk), .rstn(rstn),
+SCREEN_PF_MEM #(.AW(MEM_AW))
+      IPF_MEM (`CLKRST,
+            .vsync        (vsync),
+            .hsync        (hsync),
+            .vsync_pulse  (vsync_pulse),
+            .hsync_pulse  (hsync_pulse),
+
             .mem_addr_vld (mem_addr_vld),
             .mem_addr_gnt (mem_addr_gnt),
             .mem_addr     (mem_lcl_addr),
@@ -93,5 +93,4 @@ SCREEN_PF_MEM #(.AW(MEM_AW), .DW(DW))
            );
 
 endmodule
-`undef FF_MODULE
 //EOF

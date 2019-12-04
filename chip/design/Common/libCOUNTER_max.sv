@@ -5,12 +5,6 @@
 //   1  dout + 1
 // ovf will assert at same cycle of dout == din
 
-`ifndef SELECT_SRSTn
-  `define FF_MODULE libARstnFF
-`else
-  `define FF_MODULE libSRstnFF
-`endif
-
 module libCOUNTER_max #(parameter DW= 16)
 (
   input  logic clk,
@@ -39,5 +33,4 @@ assign {nxt_of, nxt_dout} = ce ? of ? {(DW+1){1'b0}}
                                : {of, dout};
 
 endmodule
-`undef FF_MODULE
 //EOF

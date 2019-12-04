@@ -1,12 +1,6 @@
 // Ha Minh Tran Hanh (c)
 // 8x8 font
 
-`ifndef SELECT_SRSTn
-  `define FF_MODULE libARstnFF
-`else
-  `define FF_MODULE libSRstnFF
-`endif
-
 module SCREEN_CHAR_ROM (
   input  clk,
   input  rstn,
@@ -33,10 +27,9 @@ assign font_addr = {chr_code [6] & chr_code [5], chr_code [6] & ~chr_code [5], c
 
 assign row_val = font_rom [font_addr_full];
 
-`FF_MODULE #(.W(10)) font_ff (.clk (clk), .rstn (rstn), .d (valid ? {font_addr, row} : 10'd0), .q (font_addr_full));
+`FF_MODULE #(.W(10)) font_ff (`CLKRST, .d (valid ? {font_addr, row} : 10'd0), .q (font_addr_full));
 
 assign pix_on = row_val [col];
 
 endmodule
-`undef FF_MODULE
 //EOF

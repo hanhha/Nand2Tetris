@@ -1,12 +1,6 @@
 // Ha Minh Tran Hanh (c)
 
-`ifndef SELECT_SRSTn
-  `define FF_MODULE libARstnFF
-`else
-  `define FF_MODULE libSRstnFF
-`endif
-
-module SCREEN_PF_MEM #(parameter AW = 19, DW = 16)
+module SCREEN_PF_MEM #(parameter AW = 19)
 (
   input  logic          clk,
   input  logic          rstn,
@@ -14,24 +8,88 @@ module SCREEN_PF_MEM #(parameter AW = 19, DW = 16)
   input  logic [AW-1:0] pf_addr,
   output logic [7:0]    pf_dat,
 
+  input  logic          vsync,
+  input  logic          hsync,
+  input  logic          vsync_pulse,
+  input  logic          hsync_pulse,
+
   output logic          mem_addr_vld,
   input  logic          mem_addr_gnt,
   output logic [AW-1:0] mem_addr,
   input  logic          mem_dat_vld,
   output logic          mem_dat_gnt,
-  input  logic [DW-1:0] mem_dat
+  input  logic [31:0]   mem_dat
 );
 
-// TODO: full operation 
+reg   [31:0]     cache_data [0:3]; // always prefetch 16 bytes 
+reg   [AW-2-1:0] cache_tags [0:3];
+logic [AW-2-1:0] pf_tag;
+
+// This internal cache is expected to be always hit
+logic [0:3][7:0] hit_line_data;
+logic [3:0]      tag_hit;
+
+assign pf_tag        = pf_addr [AW-1:2];
+assign tag_hit       = {pf_tag == cache_tags[3], pf_tag == cache_tags[2], pf_tag == cache_tags[1], pf_tag == cache_tags[0]};
+assign hit_line_data = {32{tag_hit [0]}} & cache_data [0]
+                     | {32{tag_hit [1]}} & cache_data [1]
+                     | {32{tag_hit [2]}} & cache_data [2]
+                     | {32{tag_hit [3]}} & cache_data [3];
+
+assign pf_dat = hit_line_data [pf_addr[1:0]];
 // Text mode test
-assign pf_dat = pf_addr < 95 ? pf_addr + 32 : 32;
+//assign pf_dat = pf_addr < 95 ? pf_addr + 32 : 32;
 
-assign {mem_addr_vld, mem_addr, mem_dat_gnt} = {1'b0, {AW{1'b0}}, 1'b1};
+logic [AW-1:0]   next_pf_mem_addr;
+logic [AW-2-1:0] next_pf_tag;
+logic [3:0]      next_tag_hit;
 
-libSink #(.W(DW)) sink_mem_dat       (.i(mem_dat));
-libSink           sink_mem_vld       (.i(mem_dat_vld));
-libSink           sink_mem_gnt       (.i(mem_addr_gnt));
+assign next_pf_mem_addr = ( (pf_addr >> 2) + 1'b1) << 2;
+assign next_pf_tag      = next_pf_mem_addr [AW-1:2];
+assign next_tag_hit     = {next_pf_tag == cache_tags[3], next_pf_tag == cache_tags[2], next_pf_tag == cache_tags[1], next_pf_tag == cache_tags[0]};
+
+logic mem_pf_evt;
+logic [1:0] replaced_frame, nxt_replaced_frame;
+
+localparam MEM_IDLE = 2'b00;
+localparam MEM_READ = 2'b01;
+localparam MEM_DATA = 2'b10;
+
+logic [1:0] mem_st, nxt_mem_st;
+
+assign mem_pf_evt  = hsync_pulse | (next_tag_hit != 4'h0 ? 1'b0 : 1'b1);
+
+always @(*) begin
+  case (mem_st)
+    MEM_IDLE: nxt_mem_st = hsync_pulse | mem_pf_evt ? MEM_READ : mem_st;
+    MEM_READ: nxt_mem_st = mem_addr_gnt             ? MEM_DATA : mem_st;
+    MEM_DATA: nxt_mem_st = mem_dat_vld ? hsync_pulse | mem_pf_evt ? MEM_READ : MEM_IDLE
+                                       : mem_st;
+    default : nxt_mem_st = MEM_IDLE;
+  endcase
+end
+
+assign mem_addr_vld = mem_st [0];
+assign mem_dat_gnt  = mem_st [1];
+
+// frame (way) is selected in turn to replace with new data
+assign nxt_replaced_frame [0] = mem_pf_evt ? ~replaced_frame [0] : replaced_frame [0];
+assign nxt_replaced_frame [1] = mem_pf_evt & replaced_frame [0] ? ~replaced_frame [1] : replaced_frame [1];
+
+`FF_MODULE #(.W(2))  mem_st_ff         (`CLKRST, .d(nxt_mem_st), .q(mem_st));
+`FF_MODULE #(.W(AW)) mem_addr_ff       (`CLKRST, .d(mem_st != MEM_READ && nxt_mem_st == MEM_READ ? (hsync_pulse ? pf_addr : next_pf_mem_addr) : mem_addr), .q(mem_addr));
+`FF_MODULE #(.W(2))  replaced_frame_ff (`CLKRST, .d(nxt_replaced_frame), .q(replaced_frame));
+
+always @(posedge clk) begin
+  if (mem_dat_vld & mem_dat_gnt) begin
+    cache_data [replaced_frame] <= mem_dat;
+    cache_tags [replaced_frame] <= mem_addr [AW-1:2];
+  end
+end
+
+libSink sink_vsync       (.i(vsync));
+libSink sink_hsync       (.i(hsync));
+libSink sink_vsync_pulse (.i(vsync_pulse));
 
 endmodule
-`undef FF_MODULE
 //EOF

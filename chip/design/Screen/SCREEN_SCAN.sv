@@ -1,11 +1,5 @@
 // Ha Minh Tran Hanh (c)
 
-`ifndef SELECT_SRSTn
-  `define FF_MODULE libARstnFF
-`else
-  `define FF_MODULE libSRstnFF
-`endif
-
 module SCREEN_SCAN #(parameter MAX_ROW = 525, MAX_COL = 420, UNIT = 5,
                                VOFFSET = 10'd46, HOFFSET = 10'd8)
 (
@@ -17,6 +11,8 @@ module SCREEN_SCAN #(parameter MAX_ROW = 525, MAX_COL = 420, UNIT = 5,
 // To mempix
   output logic       hsync,
   output logic       vsync,
+  output logic       hsync_pulse,
+  output logic       vsync_pulse,
   output logic [9:0] pf_pix_row,
   output logic [9:0] pf_pix_col,
 
@@ -33,7 +29,7 @@ localparam WORK = 2'b10;
 
 logic [1:0] cur_state;
 
-`FF_MODULE #(.W(2)) init_state_ff (.clk(clk), .rstn(rstn),
+`FF_MODULE #(.W(2)) init_state_ff (`CLKRST,
                                    .d (cur_state == IDLE ? SET  :
                                        cur_state == SET  ? WORK :
                                                            WORK),
@@ -52,21 +48,21 @@ logic [5:0] pdcount;
 logic       frame_end, half_2nd, nxt_half_2nd;
 logic       vcount_ovf, hcount_ovf, pdcount_ovf;
 
-libCOUNTER_max #(.DW(10)) vcount_counter (.clk(clk), .rstn(rstn),
+libCOUNTER_max #(.DW(10)) vcount_counter (`CLKRST,
     .we   (cur_state[0] | vcount_ovf),
     .ce   (hcount_ovf & pdcount_ovf),
     .din  (VMAX[9:0] - 1'b1),
     .of   (vcount_ovf),
     .dout (vcount));
 
-libCOUNTER_max #(.DW(10)) hcount_counter (.clk(clk), .rstn(rstn),
+libCOUNTER_max #(.DW(10)) hcount_counter (`CLKRST,
     .we   (cur_state[0] | hcount_ovf),
     .ce   (pdcount_ovf),
     .din  (HMAX[9:0] - 1'b1),
     .of   (hcount_ovf),
     .dout (hcount));
 
-libCOUNTER_max #(.DW(6))  period_counter (.clk(clk), .rstn(rstn),
+libCOUNTER_max #(.DW(6))  period_counter (`CLKRST,
     .we   (cur_state[0] | pdcount_ovf),
     .ce   (1'b1),
     .din  (UNIT[5:0] - 1'b1),
@@ -76,7 +72,7 @@ libCOUNTER_max #(.DW(6))  period_counter (.clk(clk), .rstn(rstn),
 libSink #($bits(pdcount)) sink_pdcount (.i(pdcount));
 
 assign nxt_half_2nd = cur_state [1] & hcount_ovf & pdcount_ovf ? (vcount_ovf ? 1'b0 : ~half_2nd) : half_2nd;
-`FF_MODULE half_2nd_ff (.clk(clk), .rstn(rstn), .d(nxt_half_2nd), .q(half_2nd));
+`FF_MODULE half_2nd_ff (`CLKRST, .d(nxt_half_2nd), .q(half_2nd));
 
 assign frame_end     = cur_state [1] & vcount_ovf & hcount_ovf & pdcount_ovf;
 
@@ -95,6 +91,7 @@ localparam O_FRM     = 1'b1; // Odd frame
 logic lsync, ssync, vsync_sig;
 logic hsync_sig, fporch_sig, bporch_sig;
 logic h_invi_sig, v_invi_sig;
+logic hsync_pre, vsync_pre;
 logic cur_frame;
 logic h_visible;
 logic v_visible;
@@ -118,11 +115,16 @@ assign v_invi_sig = vcount < (cur_frame == O_FRM ? 10'd18 : 10'd19) + VOFFSET; /
 assign h_invi_sig = (cur_frame ^ half_2nd) ? hcount < (FPORCH_PD + HSYNC_PD + BPORCH_PD) + HOFFSET // adjust to make pixel on column 0 visible
                                            : 1'b0 ;//hcount > HMAX[9:0];
 
-`FF_MODULE #(.W(1), .I(O_FRM)) frame_ff     (.clk(clk), .rstn(rstn), .d(interlace_mode & frame_end ? ~cur_frame : cur_frame), .q(cur_frame));
-`FF_MODULE                     h_visible_ff (.clk(clk), .rstn(rstn), .d(~h_invi_sig),                                         .q(h_visible));
-`FF_MODULE                     v_visible_ff (.clk(clk), .rstn(rstn), .d(~v_invi_sig),           .q(v_visible));
-`FF_MODULE                     hsync_ff     (.clk(clk), .rstn(rstn), .d(hsync_sig | fporch_sig | bporch_sig), .q(hsync));
-`FF_MODULE                     vsync_ff     (.clk(clk), .rstn(rstn), .d(lsync | ssync),         .q(vsync));
+`FF_MODULE #(.W(1), .I(O_FRM)) frame_ff     (`CLKRST, .d(interlace_mode & frame_end ? ~cur_frame : cur_frame), .q(cur_frame));
+`FF_MODULE                     h_visible_ff (`CLKRST, .d(~h_invi_sig),                                         .q(h_visible));
+`FF_MODULE                     v_visible_ff (`CLKRST, .d(~v_invi_sig),           .q(v_visible));
+`FF_MODULE                     hsync_ff     (`CLKRST, .d(hsync_sig | fporch_sig | bporch_sig), .q(hsync));
+`FF_MODULE                     vsync_ff     (`CLKRST, .d(lsync | ssync),         .q(vsync));
+`FF_MODULE                     hsync_pre_ff (`CLKRST, .d(hsync), .q(hsync_pre));
+`FF_MODULE                     vsync_pre_ff (`CLKRST, .d(vsync), .q(vsync_pre));
+
+assign hsync_pulse = ~hsync_pre & hsync;
+assign vsync_pulse = ~vsync_pre & vsync;
 
 // =======================================
 // Generating row and column of next pixel
@@ -130,13 +132,13 @@ assign h_invi_sig = (cur_frame ^ half_2nd) ? hcount < (FPORCH_PD + HSYNC_PD + BP
 logic [8:0]  row_cnt;
 logic [10:0] col_cnt;
 
-`FF_MODULE #(.W(9))  row_ff (.clk(clk), .rstn(rstn),
+`FF_MODULE #(.W(9))  row_ff (`CLKRST,
                              .d(v_invi_sig             ? 9'd0 :
                                 v_visible & h_visible & h_invi_sig ? row_cnt + 1'b1 :
                                                          row_cnt),
                              .q(row_cnt));
 
-`FF_MODULE #(.W(11)) col_ff (.clk(clk), .rstn(rstn),
+`FF_MODULE #(.W(11)) col_ff (`CLKRST,
                              .d(v_invi_sig ? 11'd0 :
                                 h_invi_sig ? 11'd0 :
                                              col_cnt + 1'b1),
@@ -159,10 +161,9 @@ assign nxt_dac = sync_en                 ? SYNC_LVL  :
                  h_invi_sig | v_invi_sig ? BLANK_LVL :
                                            h_visible & v_visible ? pix_val : dac;
 
-`FF_MODULE #(.W(8)) dac_ff   (.clk(clk), .rstn(rstn), .d(nxt_dac), .q(dac));
+`FF_MODULE #(.W(8)) dac_ff   (`CLKRST, .d(nxt_dac), .q(dac));
 
 assign dac_bin   = dac;
 
 endmodule
-`undef FF_MODULE
 //EOF

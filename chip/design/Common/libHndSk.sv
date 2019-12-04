@@ -1,11 +1,5 @@
 // Ha Minh Tran Hanh (c)
 
-`ifndef SELECT_SRSTn
-  `define FF_MODULE libARstnFF
-`else
-  `define FF_MODULE libSRstnFF
-`endif
-
 module libHndSk #(parameter D_WIDTH = 16)
 (
   input  logic clk,
@@ -38,5 +32,4 @@ module libHndSk #(parameter D_WIDTH = 16)
   assign rdyi = state;
 
 endmodule
-`undef FF_MODULE
 //EOF
