@@ -51,6 +51,9 @@ assign pf_textmem_loc = text_row * 52 + text_col;
 /* verilator lint_on WIDTH */
 
 // Graphic mode
+libSink sink_col (.i(pf_pix_col[0])); // TODO
+libSink #(2) sink_row (.i({pf_pix_row[9], pf_pix_row[0]})); // TODO
+
 assign grph_pix_on = 1'b0;
 
 assign pf_addr = text_mode_en ? {{(AW-11){1'b0}}, pf_textmem_loc}

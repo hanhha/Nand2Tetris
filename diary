@@ -19,4 +19,7 @@ Nov 27, 2019: Several weeks of distraction. Re-organize files and add some new c
 Dec 03, 2019: Font for text mode and display characters on screen.
 Dec 04, 2019: Implemented SRAM controller. However I had not finished my expansion board for 4 SRAM chip yet. Should I mimic it using BRAM of FPGA :D
               Implemented prefetch cache for Screen IP.
+              Yosys seemed not support multi-dimension array which caused some hassle for me.
               Fabric might be the next.
+Dec 05, 2019: Several hours later, I mimicked external SRAM using BRAM of FPGA and discovered some errors in my prefetch cache for display. 
+							It took time. Honestly, I missed Sysnopsys Verdi, JasperGold and several commercial EDA tools :( 

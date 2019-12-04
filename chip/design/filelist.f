@@ -10,3 +10,4 @@
 
 // Top
 chip.sv
+sram8bitx4.sv
