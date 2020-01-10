@@ -2,20 +2,21 @@ module chip (
   input logic clk,
   input logic rstn,
 
-//  output logic [18:0] SRAM_Address,
-//  output logic        SRAM_OE_n,
-//  output logic        SRAM_CE_n,
-//  output logic [3:0]  SRAM_WE_n,
-//  inout  logic [31:0] SRAM_DataIO,
+  output logic [18:0] SRAM_Address,
+  output logic        SRAM_OE_n,
+  output logic        SRAM_CE_n,
+  output logic [3:0]  SRAM_WE_n,
+  inout  logic [31:0] SRAM_DataIO,
 
-  output logic [7:0]  dac_bin
+  output logic [7:0]  dac_bin,
+  output logic [7:0]  led
 );
 
-logic [18:0] SRAM_Address;
-logic        SRAM_OE_n;
-logic        SRAM_CE_n;
-logic [3:0]  SRAM_WE_n;
-logic [31:0] SRAM_DataIO;
+//logic [18:0] SRAM_Address;
+//logic        SRAM_OE_n;
+//logic        SRAM_CE_n;
+//logic [3:0]  SRAM_WE_n;
+//logic [31:0] SRAM_DataIO;
 
 logic clk33;
 
@@ -76,14 +77,17 @@ assign imem_req_wr        = 1'b0;
 assign imem_req_dat_strb  = 4'h0;
 assign imem_req_dat       = 32'd0;
 
-// Dummy
-libSink #(32) sink_DataIO (.i(SRAM_DataIO));
-sram8bitx4 isram (
-        .SRAM_Address (SRAM_Address),
-        .SRAM_OE_n    (SRAM_OE_n),
-        .SRAM_CE_n    (SRAM_CE_n),
-        .SRAM_WE_n    (SRAM_WE_n),
-        .SRAM_DataIO  (SRAM_DataIO)
-);
+//// Dummy
+//libSink #(32) sink_DataIO (.i(SRAM_DataIO));
+//sram8bitx4 isram (
+//        .SRAM_Address (SRAM_Address),
+//        .SRAM_OE_n    (SRAM_OE_n),
+//        .SRAM_CE_n    (SRAM_CE_n),
+//        .SRAM_WE_n    (SRAM_WE_n),
+//        .SRAM_DataIO  (SRAM_DataIO)
+//);
+
+assign led = 8'hA5;
+
 endmodule
 //EOF

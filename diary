@@ -23,3 +23,6 @@ Dec 04, 2019: Implemented SRAM controller. However I had not finished my expansi
               Fabric might be the next.
 Dec 05, 2019: Several hours later, I mimicked external SRAM using BRAM of FPGA and discovered some errors in my prefetch cache for display. 
 							It took time. Honestly, I missed Sysnopsys Verdi, JasperGold and several commercial EDA tools :( 
+Jan 09, 2019: The newer, prettier DAC board was failed. Forturnately, I was still keeping the first board as a backup. But it took time to figure out the pins again.
+							I received ordered expansion PCB for SRAM from PCBWay 2 weeks ago. There was mistake when designed the edge connector; moreover, I could not find any shop that had edge sockets. Finally, I had to overcome it by soldering the edge connection on SRAM boardto pin header and use normal pin socket for expansion board.
+Jan 10, 2019: I could read dirty initial data from SRAM successfully. It could show randomized characters on NTSC screen.

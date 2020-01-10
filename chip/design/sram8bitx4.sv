@@ -12,7 +12,7 @@ reg [7:0] mem [0:127];
 
 initial $readmemh("ascii_show.txt", mem);
 
-assign SRAM_DataIO = ~(|SRAM_WE_n) ? 32'bz : {SRAM_Address, 2'b00} < 19'd128 ? {mem[{SRAM_Address[4:0], 2'b00}],
+assign SRAM_DataIO = ~(|SRAM_WE_n) ? 32'bz : {SRAM_Address, 2'b00} < 21'd128 ? {mem[{SRAM_Address[4:0], 2'b00}],
                                                                                 mem[{SRAM_Address[4:0], 2'b01}],
                                                                                 mem[{SRAM_Address[4:0], 2'b10}],
                                                                                 mem[{SRAM_Address[4:0], 2'b11}]}

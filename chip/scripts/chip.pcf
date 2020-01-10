@@ -1,24 +1,33 @@
 # User Constraint File for iCE40hx8k Breakout Board
 
 # Onboard LED and GPIO
-#set_io led[0] B5
-#set_io led[1] B4
-#set_io led[2] A2
-#set_io led[3] A1
-#set_io led[4] C5
-#set_io led[5] C4
-#set_io led[6] B3
-#set_io led[7] C3
+set_io led[0] B5
+set_io led[1] B4
+set_io led[2] A2
+set_io led[3] A1
+set_io led[4] C5
+set_io led[5] C4
+set_io led[6] B3
+set_io led[7] C3
 
 # Screen's DAC
-set_io dac_bin[4] M15
-set_io dac_bin[5] L16
-set_io dac_bin[6] K16
-set_io dac_bin[7] J14
-set_io dac_bin[0] N16
-set_io dac_bin[1] M16
-set_io dac_bin[2] K15
-set_io dac_bin[3] K14
+#set_io dac_bin[4] M15
+#set_io dac_bin[5] L16
+#set_io dac_bin[6] K16
+#set_io dac_bin[7] J14
+#set_io dac_bin[0] N16
+#set_io dac_bin[1] M16
+#set_io dac_bin[2] K15
+#set_io dac_bin[3] K14
+# Initial DAC board
+set_io dac_bin[7] M15
+set_io dac_bin[6] L16
+set_io dac_bin[5] K16
+set_io dac_bin[4] J14
+set_io dac_bin[3] F14
+set_io dac_bin[2] H14
+set_io dac_bin[1] G15
+set_io dac_bin[0] F15
 
 # 2 data lines I2C
 #set_io e_i2c_sck R15
@@ -29,12 +38,71 @@ set_io dac_bin[3] K14
 #set_io i2c_sck G14
 #set_io i2c_sda F14
 
+# SRAM
+set_io SRAM_OE_n         R10
+set_io SRAM_CE_n         P10
+set_io SRAM_Address[18]  M11
+set_io SRAM_Address[17]  P13
+set_io SRAM_Address[16]  T14
+set_io SRAM_Address[15]  T16
+set_io SRAM_Address[14]  T1
+set_io SRAM_Address[13]  R2
+set_io SRAM_Address[12]  R3
+set_io SRAM_Address[11]  T5
+set_io SRAM_Address[10]  T6
+set_io SRAM_Address[9]   T7
+set_io SRAM_Address[8]   T9
+set_io SRAM_Address[7]   P8
+set_io SRAM_Address[6]   T10
+set_io SRAM_Address[5]   T11
+set_io SRAM_Address[4]   N10
+set_io SRAM_Address[3]   N12
+set_io SRAM_Address[2]   T13
+set_io SRAM_Address[1]   T15
+set_io SRAM_Address[0]   R16
+set_io SRAM_DataIO[31]   D2
+set_io SRAM_DataIO[30]   F1
+set_io SRAM_DataIO[29]   G1
+set_io SRAM_DataIO[28]   H1
+set_io SRAM_DataIO[27]   J1
+set_io SRAM_DataIO[26]   K1
+set_io SRAM_DataIO[25]   L1
+set_io SRAM_DataIO[24]   M1
+set_io SRAM_DataIO[23]   N2
+set_io SRAM_DataIO[22]   P2
+set_io SRAM_DataIO[21]   R1
+set_io SRAM_DataIO[20]   B1
+set_io SRAM_DataIO[19]   C1
+set_io SRAM_DataIO[18]   D1
+set_io SRAM_DataIO[17]   E2
+set_io SRAM_DataIO[16]   F2
+set_io SRAM_DataIO[15]   G2
+set_io SRAM_DataIO[14]   H2
+set_io SRAM_DataIO[13]   J2
+set_io SRAM_DataIO[12]   K3
+set_io SRAM_DataIO[11]   L3
+set_io SRAM_DataIO[10]   M2
+set_io SRAM_DataIO[9]    N3
+set_io SRAM_DataIO[8]    P1
+set_io SRAM_DataIO[7]    T2
+set_io SRAM_DataIO[6]    T3
+set_io SRAM_DataIO[5]    R4
+set_io SRAM_DataIO[4]    R5
+set_io SRAM_DataIO[3]    R6
+set_io SRAM_DataIO[2]    T8
+set_io SRAM_DataIO[1]    R9
+set_io SRAM_DataIO[0]    P9
+set_io SRAM_WE_n[3]      A7
+set_io SRAM_WE_n[2]      B9
+set_io SRAM_WE_n[1]      C9
+set_io SRAM_WE_n[0]      B11
+
 # Resetn button
-set_io -pullup yes rstn D16 
+set_io -pullup yes rstn B8
 # Other buttons
-#set_io -pullup yes btnOK C16
-#set_io -pullup yes btnUL  D14
-#set_io -pullup yes btnDR  B16
+#set_io -pullup yes btnOK B7
+#set_io -pullup yes btnUL A5  
+#set_io -pullup yes btnDR C6
 
 # Onboard 12Mhz oscillator
 set_io clk J3

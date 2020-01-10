@@ -20,6 +20,10 @@ verilator: ##@Simulation Compile design and test environment
 sim: verilator ##@Simulation Simulate design
 	lldb -o 'run' -o 'quit' obj_dir/V${TOP}
 
+.PHONY: debug
+debug: trace.vcd 
+	open -a gtkwave trace.vcd
+
 .PHONY: fpga
 fpga: ${TOP}.bin upload ##@Hardware Synthesize design, map and upload to FPGA device
 
