@@ -1,0 +1,20 @@
+[options]
+mode bmc
+depth 100
+
+[engines]
+abc bmc3
+smtbmc boolector
+
+[script]
+read_verilog -sv common.svh libSRstnFF.sv libARstnFF.sv XFifo.sv XMem.sv 
+read_verilog -sv -formal QIf.sv 
+prep -top QIf
+
+[files]
+QIf.sv
+../Common/common.svh
+../Common/libARstnFF.sv
+../Common/libSRstnFF.sv
+../Common/XFifo.sv
+../Common/XMem.sv

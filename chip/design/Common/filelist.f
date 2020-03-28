@@ -5,3 +5,6 @@ libCOUNTER.sv
 libCOUNTER_max.sv
 libHndSk.sv
 libSink.sv
+libDummy.sv
+XFifo.sv
+XMem.sv
