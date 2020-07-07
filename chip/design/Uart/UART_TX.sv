@@ -14,24 +14,31 @@ module UART_TX #(parameter CLK_PER_BAUD = 8, TW = 10)
   output logic       uart_tx
 );
 
+localparam DW = 8;
+localparam BITS_PER_TRANS = DW + 2;
+
 localparam IDLE = 0;
 localparam BUSY = 1;
 
 logic       st, nxt_st;
 logic       nxt_gnt;
-logic [9:0] cur_dat, nxt_dat;
+logic [BITS_PER_TRANS-1:0] cur_dat, nxt_dat;
 logic       is_stop;
 
-`FF_MODULE #(.W(1))            st_ff  (`CLKRST, .d (nxt_st),  .q(st));
-`FF_MODULE #(.W(1), .I(1'b1))  gnt_ff (`CLKRST, .d (nxt_gnt), .q(gnt));
-`FF_MODULE #(.W(10))           dat_ff (`CLKRST, .d (nxt_dat), .q(cur_dat));
+logic [3:0]    bit_cnt, nxt_bit_cnt;
+logic [TW-1:0] cnt, nxt_cnt;
 
-always @(*) begin
-  nxt_dat = vld & gnt ? {1'b1, dat, 1'b0} :
-                        baudrate_ovf ? {1'b1, cur_dat [7:1]} : cur_dat; 
-end
+logic baudrate_ovf, baudrate_early_ovf, nxt_baudrate_early_ovf;
 
-assign is_stop = bit_cnt == 4'd9 ? 1'b1 : 1'b0;
+`FF_MODULE #(.W(1))              st_ff  (`CLKRST, .d (nxt_st),  .q(st));
+`FF_MODULE #(.W(1), .I(1'b1))    gnt_ff (`CLKRST, .d (nxt_gnt), .q(gnt));
+
+`FF_MODULE #(.W(BITS_PER_TRANS), .I({{(BITS_PER_TRANS-1){1'b1}}, 1'b1})) dat_ff (`CLKRST, .d (nxt_dat), .q(cur_dat));
+
+assign nxt_dat = vld & gnt ? {1'b1, dat, 1'b0} :
+                             baudrate_ovf ? {1'b1, cur_dat [BITS_PER_TRANS-1:1]} : cur_dat; 
+
+assign is_stop = bit_cnt == BITS_PER_TRANS - 1 ? 1'b1 : 1'b0;
 
 always @(*) begin
   case (st)
@@ -40,7 +47,7 @@ always @(*) begin
             nxt_st  = vld ? BUSY : st; 
             
             nxt_baudrate_early_ovf = 1'b0;
-            nxt_cnt                = vld ? (TW)'d0 : cnt;
+            nxt_cnt                = vld ? {TW{1'b0}} : cnt;
             nxt_bit_cnt            = vld ? 4'd0 : bit_cnt;
           end
     BUSY: begin
@@ -50,9 +57,9 @@ always @(*) begin
                               : gnt;
             nxt_st  = is_stop & baudrate_ovf & ~vld ? IDLE : st;   
 
-            nxt_cnt                = cnt        == CLK_PER_BAUD - (TW)'d1 ? (TW)'b0 : cnt + 1'b1;
-            nxt_baudrate_early_ovf = cnt + 1'b1 == CLK_PER_BAUD - (TW)'d2 ? 1'b1    : 1'b0;
-            nxt_bit_cnt            = baudrate_ovf ? bit_cnt == 4'd9 ? 4'd0 : bit_cnt + 1'b1
+            nxt_cnt                = cnt        == CLK_PER_BAUD - 1 ? {TW{1'b0}} : cnt + 1'b1;
+            nxt_baudrate_early_ovf = cnt + 1'b1 == CLK_PER_BAUD - 2 ? 1'b1    : 1'b0;
+            nxt_bit_cnt            = baudrate_ovf ? is_stop ? 4'd0 : bit_cnt + 1'b1
                                                   : bit_cnt; 
           end
   endcase
@@ -73,7 +80,11 @@ end
     always @(posedge clk) f_past_valid <= rstn;
     assign assert_en = rstn & f_past_valid; 
     
-    // TODO: add assertions to prove design here
+    always @(posedge clk) begin
+      if (assert_en) begin
+        if (gnt) assert ((is_stop & baudrate_ovf) || (st == IDLE)); // gnt only if finish transfering last bit or in IDLE state
+      end
+    end
   `endif
 `endif
 

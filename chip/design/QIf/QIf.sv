@@ -6,16 +6,21 @@ module QIf #(parameter DW = 8, TX_DEPTH = 8, RX_DEPTH = 8) (
   input logic clk,
   input logic rstn,
 
-  input  logic          req_vld,
-  output logic          req_gnt,
-  input  logic          req_wr,
-  input  logic          req_wait,
-  input  logic [DW-1:0] req_dat,
+  input  logic          wr_vld,
+  output logic          wr_gnt,
+  input  logic          wr_wait,
+  input  logic [DW-1:0] wr_dat,
+  output logic          wr_err,
+  output logic          wr_rvld,
+  input  logic          wr_rgnt,
 
-  output logic          rsp_vld,
-  input  logic          rsp_gnt,
-  output logic          rsp_err,
-  output logic [DW-1:0] rsp_dat,
+  input  logic          rd_vld,
+  output logic          rd_gnt,
+  input  logic          rd_wait,
+  output logic [DW-1:0] rd_dat,
+  output logic          rd_err,
+  output logic          rd_rvld,
+  input  logic          rd_rgnt,
 
   output logic          txq_empty_n,
   output logic [DW-1:0] txq_dat,
@@ -35,56 +40,76 @@ XFifo #(.DW (DW), .DEPTH (TX_DEPTH)) txq (`CLKRST,
 
 XFifo #(.DW (DW), .DEPTH (RX_DEPTH)) rxq (`CLKRST,
   .we (rxq_we), .din (rxq_dat), .full_n (rxq_full_n),
-  .re (rx_re),  .dout (rsp_dat), .empty_n (rx_empty_n));
+  .re (rx_re),  .dout (rd_dat), .empty_n (rx_empty_n));
 
-localparam IDLE = 4'b0001;
-localparam WRIT = 4'b0010;
-localparam READ = 4'b0100;
-localparam RSP  = 4'b1000;
+localparam RST  = 3'b000;
+localparam IDLE = 3'b001;
+localparam WAIT = 3'b010;
+localparam RSP  = 3'b100;
 
-logic [3:0] cur_st, nxt_st;
+logic [2:0] wr_st, nxt_wr_st, rd_st, nxt_rd_st;
 logic wr_ok, rd_ok, wr_nok, rd_nok;
 
-assign wr_ok  = req_wr & tx_full_n;
-assign wr_nok = req_wr & ~tx_full_n;
-assign rd_ok  = ~req_wr & rx_empty_n;
-assign rd_nok = ~req_wr & ~rx_empty_n;
+assign wr_ok  = wr_vld & tx_full_n;
+assign wr_nok = wr_vld & ~tx_full_n;
+assign rd_ok  = rd_vld & rx_empty_n;
+assign rd_nok = rd_vld & ~rx_empty_n;
 
 always @(*) begin
-  case (cur_st)
-    IDLE : nxt_st = {req_vld & (~req_wait | wr_ok | rd_ok),
-                     req_vld & rd_nok & req_wait,
-                     req_vld & wr_nok & req_wait,
-                     ~req_vld};
-    WRIT,
-    READ : nxt_st = cur_st [1] & tx_full_n | cur_st [2] & rx_empty_n ? RSP : cur_st;
-    RSP  : nxt_st = rsp_gnt ? IDLE : cur_st;
-    default  : nxt_st = IDLE;
+  case (rd_st)
+    RST  : nxt_rd_st = IDLE;
+    IDLE : nxt_rd_st = {rd_vld & (~rd_wait | rd_ok),
+                        rd_vld & rd_nok & rd_wait,
+                       ~rd_vld};
+    WAIT : nxt_rd_st     = rd_st [1] & rx_empty_n ? RSP : rd_st;
+    RSP  : nxt_rd_st     = rd_rgnt ? IDLE : rd_st;
+    default  : nxt_rd_st = RST;
   endcase
 end
 
-`FF_MODULE #(.W(4), .I(IDLE)) cur_st_ff (`CLKRST, .d (nxt_st), .q(cur_st));
+logic nxt_rd_err;
+assign nxt_rd_err = rd_st [0] & nxt_rd_st [2] ? (rd_nok ? 1'b1 : 1'b0)
+                                              : (rd_st [1] & nxt_rd_st [2] ? 1'b0 : rd_err);
 
-assign req_gnt   =  cur_st [0];
-assign rsp_vld   =  cur_st [3];
+`FF_MODULE #(.W(3), .I(RST)) rd_st_ff (`CLKRST, .d (nxt_rd_st), .q(rd_st));
+`FF_MODULE rd_err_ff (`CLKRST, .d (nxt_rd_err), .q(rd_err));
 
-logic nxt_rsp_err;
-assign nxt_rsp_err = cur_st [0] & nxt_st [3] ? ((wr_nok | rd_nok) ? 1'b1
-                                                                  : 1'b0)
-                                             : (cur_st [1] | cur_st [2]) & nxt_st [3] ? 1'b0
-                                                                                      : rsp_err;
-`FF_MODULE rsp_err_ff (`CLKRST, .d (nxt_rsp_err), .q(rsp_err));
+assign rd_gnt   =  rd_st [0];
+assign rd_rvld  =  rd_st [2];
+
+always @(*) begin
+  case (wr_st)
+    RST  : nxt_wr_st = IDLE;
+    IDLE : nxt_wr_st = {wr_vld & (~wr_wait | wr_ok),
+                        wr_vld & wr_nok & wr_wait,
+                       ~wr_vld};
+    WAIT : nxt_wr_st     = wr_st [1] & tx_full_n ? RSP : wr_st;
+    RSP  : nxt_wr_st     = wr_rgnt ? IDLE : wr_st;
+    default  : nxt_wr_st = RST;
+  endcase
+end
+
+logic nxt_wr_err;
+assign nxt_wr_err = wr_st [0] & nxt_wr_st [2] ? (wr_nok ? 1'b1 : 1'b0)
+                                              : (wr_st [1] & nxt_wr_st [2] ? 1'b0 : wr_err);
+
+`FF_MODULE #(.W(3), .I(RST)) wr_st_ff (`CLKRST, .d (nxt_wr_st), .q(wr_st));
+`FF_MODULE wr_err_ff (`CLKRST, .d (nxt_wr_err), .q(wr_err));
+
+assign wr_gnt   =  wr_st [0];
+assign wr_rvld  =  wr_st [2];
+
 
 logic nxt_rx_re;
-assign nxt_rx_re = nxt_st [3] & (cur_st [2] | (cur_st [0] & rd_ok)) ? 1'b1 : 1'b0;
+assign nxt_rx_re = nxt_rd_st [2] & (rd_st [1] | (rd_st [0] & rd_ok)) ? 1'b1 : 1'b0;
 `FF_MODULE rx_re_ff (`CLKRST, .d (nxt_rx_re), .q(rx_re));
 
 logic nxt_tx_we;
-assign nxt_tx_we = nxt_st [3] & (cur_st [1] | (cur_st [0] & wr_ok)) ? 1'b1 : 1'b0;
+assign nxt_tx_we = nxt_wr_st [2] & (wr_st [1] | (wr_st [0] & wr_ok)) ? 1'b1 : 1'b0;
 `FF_MODULE tx_we_ff (`CLKRST, .d (nxt_tx_we), .q(tx_we));
 
 logic [DW-1:0] nxt_tx_dat;
-assign nxt_tx_dat = cur_st [0] & req_wr ? req_dat : tx_dat;
+assign nxt_tx_dat = wr_st [0] & wr_vld ? wr_dat : tx_dat;
 `FF_MODULE #(.W(DW)) tx_dat_ff (`CLKRST, .d (nxt_tx_dat), .q(tx_dat));
 
 `ifdef FORMAL
@@ -99,16 +124,29 @@ assign nxt_tx_dat = cur_st [0] & req_wr ? req_dat : tx_dat;
 
     always @(posedge clk) begin
       if (assert_en) begin
-      // assert: only 4 defined onehot states
-        assert (cur_st == IDLE || cur_st == WRIT || cur_st == READ || cur_st == RSP);
-      // assert : valid change state: IDLE -> [WRIT, READ, RSP]
-      //                              WRIT -> RSP -> IDLE
-      //                              READ -> RSP -> IDLE
-      //                              RSP -> IDLE
-        if (cur_st == IDLE) assert ($past(cur_st) == IDLE || $past(cur_st) == RSP);
-        if (cur_st == WRIT) assert ($past(cur_st) == WRIT || $past(cur_st) == IDLE);
-        if (cur_st == READ) assert ($past(cur_st) == READ || $past(cur_st) == IDLE);
-        if (cur_st == RSP)  assert ($past(cur_st) == RSP  || $past(cur_st) == IDLE || $past(cur_st) == READ || $past(cur_st) == WRIT);
+        if (wr_vld & wr_gnt & ~wr_wait) begin
+          if (tx_full_n) begin
+            @(posedge clk); assert (wr_rvld && ~wr_err);
+          end else begin
+            @(posedge clk); assert (wr_rvld && wr_err);
+          end
+        end else if ($past(wr_vld & wr_gnt & wr_wait) begin
+          wait (tx_full_n); assert (wr_rvld && ~wr_err);
+        end
+      end
+    end
+
+    always @(posedge clk) begin
+      if (assert_en) begin
+        if (rd_vld & rd_gnt & ~rd_wait) begin
+          if (rx_empty_n) begin
+            @(posedge clk); assert (rd_rvld && ~rd_err);
+          end else begin
+            @(posedge clk); assert (rd_rvld && rd_err);
+          end
+        end else if ($past(rd_vld & rd_gnt & rd_wait) begin
+          wait (rx_empty_n); assert (rd_rvld && ~rd_err);
+        end
       end
     end
     // assert: tx_we and rx_re are asserted only in 1 cycle
@@ -118,8 +156,6 @@ assign nxt_tx_dat = cur_st [0] & req_wr ? req_dat : tx_dat;
         if (rx_re) assert ($past(rx_re) == 1'b0);
       end
     end
-  `else
-    //TODO: use concurrent assertion and SVA sequences for above assertions
   `endif
 `endif
 endmodule
