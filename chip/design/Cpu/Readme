@@ -1,0 +1,12 @@
+CPU architecture
+
+This is comprised of following blocks:
+- IfId : Instruction fetch Instruction Decode
+- Mr   : Memory read to read data from source M
+- Mw   : Memory write to write data to destination M
+- Ss   : Source select to select source data to input of Alu
+- Alu  : Alu block
+- Cc   : Cpu control which contains all built-in registers as well as PC control
+
+Sample data flow:
+There are 2 pc values to IfId from Cc: pf_pc and pc. IfId will fetch instruction at pf_pc first then hold it stand at output.  
