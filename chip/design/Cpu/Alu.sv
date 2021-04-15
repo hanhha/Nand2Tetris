@@ -32,13 +32,13 @@ module Alu #(parameter D_W = 16) (
 
   logic [D_WIDTH-1:0] calc_out;
 
-  assign modX1 = zx ? {D_W{1'b0}} : x;
-  assign modXf = nx ? ~modX1          : modX1;
-  assign modY1 = zy ? {D_W{1'b0}} : y;
-  assign modYf = ny ? ~modY1          : modY1;
+  assign modX1 = zx_s ? {D_W{1'b0}} : x_s;
+  assign modXf = nx_s ? ~modX1          : modX1;
+  assign modY1 = zy_s ? {D_W{1'b0}} : y_s;
+  assign modYf = ny_s ? ~modY1          : modY1;
 
-  assign {of, calc_out} = f ? modXf + modYf : {1'b0, modXf & modYf};
-  assign out = no ? ~calc_out : calc_out; 
+  assign {of, calc_out} = f_s ? modXf + modYf : {1'b0, modXf & modYf};
+  assign out = no_s ? ~calc_out : calc_out; 
   assign zr  = out == {D_W{1'b0}} ? 1'b1 : 1'b0;
   assign ng  = out [D_W-1];
 

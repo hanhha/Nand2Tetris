@@ -1,12 +1,25 @@
 CPU architecture
 
 This is comprised of following blocks:
-- IfId : Instruction fetch Instruction Decode
-- Mr   : Memory read to read data from source M
-- Mw   : Memory write to write data to destination M
-- Ss   : Source select to select source data to input of Alu
-- Alu  : Alu block
-- Cc   : Cpu control which contains all built-in registers as well as PC control
+- If  : Instruction fetch
+- Id  : Instruction Decode
+- Mr  : Memory read to read data from source M
+- Mw  : Memory write to write data to destination M
+- As  : Alu source select to select source data to input of Alu
+- Alu : Alu block
+- Cs  : Completer source select to select source data to input of Cc
+- Cc  : Completer control - Cpu control which contains all built-in registers as well as PC control
 
-Sample data flow:
-There are 2 pc values to IfId from Cc: pf_pc and pc. IfId will fetch instruction at pf_pc first then hold it stand at output.  
+To simply the protocol and get low latency, interface between IfId, Mr, Mw with downstream memory is declared as below"
+- Request channel:
+  Output : cs (chip select), wr (write), adr (address), wdat (write data), wstrb
+  Input  : wait
+  Requirement: if cs asserted while wait asserted, then wr, adr, wstrb and wdat must be stable. Downstream can assert wait while using cs, wr, adr, wdat, wstrb for preparing its resource.
+- Response channel:
+  Input  : rdat (read data), err (error)
+  Requirement: must be available at next cycle after request channel with wait deasserted.
+
+Instruction flow:
+1 - IfId:
+  - Decode instruction and output source info, destination info.
+- If source 
