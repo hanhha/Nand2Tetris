@@ -13,8 +13,8 @@ This is comprised of following blocks:
 To simply the protocol and get low latency, interface between IfId, Mr, Mw with downstream memory is declared as below"
 - Request channel:
   Output : cs (chip select), wr (write), adr (address), wdat (write data), wstrb
-  Input  : wait
-  Requirement: if cs asserted while wait asserted, then wr, adr, wstrb and wdat must be stable. Downstream can assert wait while using cs, wr, adr, wdat, wstrb for preparing its resource.
+  Input  : rdy 
+  Requirement: if cs asserted while rdy de-asserted, then wr, adr, wstrb and wdat must be stable. Downstream can assert wait while using cs, wr, adr, wdat, wstrb for preparing its resource.
 - Response channel:
   Input  : rdat (read data), err (error)
   Requirement: must be available at next cycle after request channel with wait deasserted.
