@@ -1,7 +1,9 @@
 // HMTH (c)
 // Instruction decode
 
-module Id (
+module Id
+  import CpuPkg::*;
+(
   input logic clk,
   input logic rstn,
 

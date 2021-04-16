@@ -1,12 +1,12 @@
 CPU architecture
 
 This is comprised of following blocks:
-- If  : Instruction fetch
-- Id  : Instruction Decode
+- If  : Instruction fetch - Done
+- Id  : Instruction Decode - Done
+- Ex  : Executor - trigger Mr if needed and select sources for input of Alu
 - Mr  : Memory read to read data from source M
-- Mw  : Memory write to write data to destination M
-- As  : Alu source select to select source data to input of Alu
 - Alu : Alu block
+- Mw  : Memory write to write data to destination M
 - Cs  : Completer source select to select source data to input of Cc
 - Cc  : Completer control - Cpu control which contains all built-in registers as well as PC control
 
